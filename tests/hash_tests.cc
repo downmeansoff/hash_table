@@ -52,9 +52,14 @@ TEST(hash_table_test, erase) {
 	ASSERT_EQ(ht.get_count(), 0);
 }
 
-
 TEST(hash_table_test, count) {
 	HashTable<int, int> ht(11);
 	ht.insert(12, 4);
 	ASSERT_EQ(ht.count(12), 0);
+}
+
+TEST(hash_table_test, statistics) {
+	for (auto i = 25; i < 476; i += 50) {
+		statistics(i);
+	}
 }
