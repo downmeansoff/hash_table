@@ -13,6 +13,10 @@ struct Pair {
 		stream << "(" << pair.key << "," << pair.value << ")";
 		return stream;
 	}
+
+	bool operator==(const Pair& other){
+		return key == other.key && value == other.value && is_filled == other.is_filled;
+	}
 };
 
 template <class Key, class Value>
@@ -38,6 +42,32 @@ public:
 			std::uniform_int_distribution<> dist(min, max);
 			_data[i] = new Pair{ i, dist(gen), true };
 		}
+	}
+
+	bool operator==(const HashTable& other){
+		if (_size != other._size || _count_pairs!= other._count_pairs) return false;
+		for (size_t i = 0; i < std::min(this->_data.size(), other._data.size()); ++i){
+			if (_data[i] != other._data[i]) return false;
+		}
+		return true;
+	}
+
+	HashTable(const HashTable& other) : _size(other._size), _count_pairs(other._count_pairs) {
+		_data.resize(other._size);
+		if (other == *this) return;
+		for (auto& pair : other._data)
+		{
+			if (pair.is_filled) insert(pair.key, pair.value);
+		}
+	}
+
+	HashTable& operator=(const HashTable& other) {
+		if (this != &other) {
+			_size = other._size;
+			_count_pairs = other._count_pairs;
+			_data = other._data;
+		}
+		return *this;
 	}
 
 	void grow() {
@@ -96,7 +126,19 @@ public:
 		return false;
 	}
 
-	Value* search(Key key) {
+	bool erase(const Key& key) {
+		for (size_t i = 0; i < _data.size(); ++i) {
+			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _data.size();
+			if (_data[index].is_filled && _data[index].key == key) {
+				_data[index].is_filled = false;
+				--_count_pairs;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	Value* search(const Key& key) {
 		for (size_t i = 0; i < _data.size(); ++i) {
 			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _data.size();
 			if (_data[index].is_filled && _data[index].key == key) {
@@ -105,6 +147,17 @@ public:
 		}
 		return nullptr;
 	}
+
+	size_t count(const Key& key) {
+		size_t collisions = 0;
+		for (size_t i = 0; i < _size; ++i) {
+			if (_data[i].is_filled && (hash(key) == hash(_data[i].key && _data[i].key != key))) {
+				++collisions;
+			}
+		}
+		return collisions;
+	}
+
 
 	size_t get_size() {
 		return _size; 
@@ -124,5 +177,7 @@ public:
 			if (pair.is_filled) std::cout << pair<< std::endl;
 		}
 	}
+
+	~HashTable() = default;
 };
 

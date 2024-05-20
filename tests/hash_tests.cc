@@ -43,3 +43,18 @@ TEST(hash_table_test, search) {
 	ht.insert(12, 4);
 	ASSERT_EQ(*ht.search(12), 4);
 }
+
+TEST(hash_table_test, erase) {
+	HashTable<int, int> ht(11);
+	ht.insert(12, 4);
+	ASSERT_TRUE(ht.erase(12));
+	ASSERT_FALSE(ht.erase(12));
+	ASSERT_EQ(ht.get_count(), 0);
+}
+
+
+TEST(hash_table_test, count) {
+	HashTable<int, int> ht(11);
+	ht.insert(12, 4);
+	ASSERT_EQ(ht.count(12), 0);
+}
