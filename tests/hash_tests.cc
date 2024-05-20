@@ -30,3 +30,16 @@ TEST(hash_table_test, insert_or_assign) {
 	ht.insert_or_assign(12, 5);
 	ASSERT_EQ(ht.get_count(), 1);
 }
+
+TEST(hash_table_test, contains) {
+	HashTable<int, int> ht(11);
+	ht.insert(12, 4);
+	ASSERT_TRUE(ht.contains(4));
+	ASSERT_FALSE(ht.contains(3243));
+}
+
+TEST(hash_table_test, search) {
+	HashTable<int, int> ht(11);
+	ht.insert(12, 4);
+	ASSERT_EQ(*ht.search(12), 4);
+}

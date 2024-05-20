@@ -89,6 +89,23 @@ public:
 		}
 	}
 
+	bool contains(Value value) {
+		for (auto& pair : _data) {
+			if (pair.is_filled && (pair.value == value)) return true;
+		}
+		return false;
+	}
+
+	Value* search(Key key) {
+		for (size_t i = 0; i < _data.size(); ++i) {
+			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _data.size();
+			if (_data[index].is_filled && _data[index].key == key) {
+				return &(_data[index].value);
+			}
+		}
+		return nullptr;
+	}
+
 	size_t get_size() {
 		return _size; 
 	}
