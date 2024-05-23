@@ -48,6 +48,7 @@ public:
 	HashTable(size_t size, size_t count_pairs, const Value& min, const Value& max, size_t& collision_counter) : _size(size), _count_pairs(count_pairs) {
 		// Проверяем, что размер хеш-таблицы не равен нулю
 		if (size == 0) throw std::invalid_argument("size = 0");
+		if (count_pairs > size) count_pairs = size;
 		// Изменяем размер вектора данных на указанный размер
 		_data.resize(size);
 		// Создаем объекты для генерации случайных чисел
@@ -110,7 +111,7 @@ public:
 			if (load_factor > 0.6) grow(); // Увеличиваем размер таблицы при превышении коэффициента загрузки
 		}
 		for (size_t i = 0; i < _data.size(); ++i) {
-			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _data.size();
+			size_t index = (hash(key) + i) % _data.size();
 			if (!_data[index].is_filled) {
 				_data[index] = Pair{ key, value, true }; // Вставляем новый элемент
 				++_count_pairs; // Увеличиваем количество пар
@@ -125,7 +126,7 @@ public:
 	// Функция вставки элемента для статистического анализа коллизий
 	void insert_stat(const Key& key, const Value& value, size_t& collision_counter) {
 		for (size_t i = 0; i < _data.size(); ++i) {
-			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _data.size();
+			size_t index = (hash(key) + i) % _data.size();
 			// Проверяем, заполнен ли элемент
 			if (!_data[index].is_filled) {
 				_data[index] = Pair{ key, value, true }; // Вставляем новый элемент
@@ -145,7 +146,7 @@ public:
 			if (load_factor > 0.6) grow(); // Увеличиваем размер таблицы при превышении коэффициента загрузки
 		}
 		for (size_t i = 0; i < _data.size(); ++i) {
-			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _size;
+			size_t index = (hash(key) + i) % _data.size();
 			if (!_data[index].is_filled) {
 				_data[index] = Pair{ key, value, true }; // Вставляем новый элемент
 				++_count_pairs; // Увеличиваем количество пар
@@ -170,7 +171,7 @@ public:
 	// Функция удаления элемента по ключу из хеш-таблицы
 	bool erase(const Key& key) {
 		for (size_t i = 0; i < _data.size(); ++i) {
-			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _data.size();
+			size_t index = (hash(key) + i) % _data.size();
 			// Проверяем, заполнен ли элемент и соответствует ли ключ
 			if (_data[index].is_filled && _data[index].key == key) {
 				_data[index].is_filled = false; // Помечаем элемент как не заполненный
@@ -184,7 +185,7 @@ public:
 	// Функция поиска значения по ключу в хеш-таблице
 	Value* search(const Key& key) {
 		for (size_t i = 0; i < _data.size(); ++i) {
-			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _data.size();
+			size_t index = (hash(key) + i) % _data.size();
 			// Проверяем, заполнен ли элемент и соответствует ли ключ
 			if (_data[index].is_filled && _data[index].key == key) {
 				return &(_data[index].value); // Возвращаем указатель на значение
@@ -236,7 +237,7 @@ void statistics(const size_t table_size) {
 		size_t collision_counter = 0; // Счетчик коллизий для текущей итерации
 
 		// Создаем новую хеш-таблицу с указанным размером и количеством узлов
-		HashTable<int, int> hashTable(table_size, count_nodes, 0, 1000, collision_counter);
+		HashTable<int, int> hashTable(table_size, count_nodes, 0, 100000, collision_counter);
 		sum += collision_counter; // Увеличиваем сумму коллизий
 	}
 
